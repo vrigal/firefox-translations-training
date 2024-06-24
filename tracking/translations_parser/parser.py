@@ -5,7 +5,7 @@ from collections import defaultdict
 from collections.abc import Iterable, Iterator, Sequence
 from datetime import datetime
 from itertools import tee
-from typing import Callable, DefaultDict
+from typing import Callable, DefaultDict, List
 
 import yaml
 
@@ -317,11 +317,11 @@ class TrainingParser:
             publisher.close()
 
     @property
-    def logs_str(self) -> str:
-        return "\n".join(
+    def logs_strings(self) -> List[str]:
+        return [
             "".join(f"[{key}] {val}\n" for val in values)
             for key, values in self.indexed_logs.items()
-        )
+        ]
 
     @property
     def output(self) -> TrainingLog:
