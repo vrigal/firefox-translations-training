@@ -192,17 +192,19 @@ class WandB(Publisher):
     def close(self) -> None:
         if self.wandb is None:
             return
-        if self.parser is not None:
-            # Store runtime logs as the main log artifact
-            # This will be overwritten in case an unhandled exception occurs
-            with (Path(self.wandb.dir) / "output.log").open("w") as f:
-                f.write(self.parser.logs_str)
 
         # Publish artifacts
         if self.artifacts:
             artifact = wandb.Artifact(name=self.artifacts_name, type=self.artifacts_name)
             artifact.add_dir(local_path=str(self.artifacts.resolve()))
             self.wandb.log_artifact(artifact)
+
+        if self.parser is not None:
+            # Store Marian logs as the main log artifact, instead of W&B client runtime
+            # It is done just before finishing the run
+            # This will be overwritten in case an unhandled exception occurs
+            with (Path(self.wandb.dir) / "output.log").open("w") as f:
+                f.write(self.parser.logs_str)
 
         self.wandb.finish()
 
