@@ -207,8 +207,8 @@ class WandB(Publisher):
         if self.parser is not None:
             # Store Marian logs as the main log artifact, instead of W&B client runtime.
             # This will be overwritten in case an unhandled exception occurs.
-            for line in self.parser.logs_strings:
-                sys.stdout.write(line)
+            for line in self.parser.parsed_logs:
+                sys.stdout.write(f"{line}\n")
 
         self.wandb.finish()
 
