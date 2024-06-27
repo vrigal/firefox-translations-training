@@ -7,9 +7,9 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Sequence
 
-import wandb
 import yaml
 
+import wandb
 from translations_parser.data import Metric, TrainingEpoch, TrainingLog, ValidationEpoch
 from translations_parser.utils import parse_task_label, suffix_from_group
 

@@ -42,23 +42,22 @@ For instance for a value of: "fetches/wmt09":
 
 
 import argparse
-import json
-import os
 import subprocess
-from textwrap import dedent, indent
+from textwrap import dedent
 from typing import Optional
 
-from sacrebleu.metrics.bleu import BLEU, BLEUScore
-from sacrebleu.metrics.chrf import CHRF, CHRFScore
-
-from pipeline.common.logging import get_logger
-
-logger = get_logger("eval")
+# from sacrebleu.metrics.bleu import BLEU, BLEUScore
+# from sacrebleu.metrics.chrf import CHRF, CHRFScore
+#
+# from pipeline.common.logging import get_logger
+#
+# logger = get_logger("eval")
 try:
     from translations_parser.utils import metric_from_tc_context
     from translations_parser.wandb import add_wandb_arguments, get_wandb_publisher
 
     WANDB_AVAILABLE = True
+    print("w&b ok")
 except ImportError as e:
     print(f"Failed to import tracking module: {e}")
     WANDB_AVAILABLE = False
@@ -76,9 +75,9 @@ def run_bash_oneliner(command: str):
     ]
     command = " \\\n".join(lines)
 
-    logger.info("-----------------Running bash in one line--------------")
-    logger.info(indent(command_dedented, "  "))
-    logger.info("-------------------------------------------------------")
+    # logger.info("-----------------Running bash in one line--------------")
+    # logger.info(indent(command_dedented, "  "))
+    # logger.info("-------------------------------------------------------")
     return subprocess.check_call(command, shell=True)
 
 
@@ -151,144 +150,149 @@ def main(args_list: Optional[list[str]] = None) -> None:
 
     args = parser.parse_args(args_list)
 
-    src = args.src
-    trg = args.trg
-    dataset_prefix = args.dataset_prefix
-    artifacts_prefix = args.artifacts_prefix
+    # src = args.src
+    # trg = args.trg
+    # dataset_prefix = args.dataset_prefix
+    # artifacts_prefix = args.artifacts_prefix
 
-    artifacts_dir = os.path.dirname(artifacts_prefix)
-    source_file_compressed = f"{dataset_prefix}.{src}.{args.artifact_ext}"
-    source_file = f"{artifacts_prefix}.{src}"
-    target_file_compressed = f"{dataset_prefix}.{trg}.{args.artifact_ext}"
-    target_file = f"{artifacts_prefix}.{trg}"
-    target_ref_file = f"{artifacts_prefix}.{trg}.ref"
-    marian_decoder = f'"{args.marian}"/marian-decoder'
-    marian_log_file = f"{artifacts_prefix}.log"
-    language_pair = f"{src}-{trg}"
-    metrics_file = f"{artifacts_prefix}.metrics"
-    metrics_json = f"{artifacts_prefix}.metrics.json"
+    # artifacts_dir = os.path.dirname(artifacts_prefix)
+    # source_file_compressed = f"{dataset_prefix}.{src}.{args.artifact_ext}"
+    # source_file = f"{artifacts_prefix}.{src}"
+    # target_file_compressed = f"{dataset_prefix}.{trg}.{args.artifact_ext}"
+    # target_file = f"{artifacts_prefix}.{trg}"
+    # target_ref_file = f"{artifacts_prefix}.{trg}.ref"
+    # marian_decoder = f'"{args.marian}"/marian-decoder'
+    # marian_log_file = f"{artifacts_prefix}.log"
+    # language_pair = f"{src}-{trg}"
+    # metrics_file = f"{artifacts_prefix}.metrics"
+    # metrics_json = f"{artifacts_prefix}.metrics.json"
 
-    # Configure Marian for the different model variants.
-    marian_extra_args = []
-    if args.model_variant == "quantized":
-        marian_extra_args = ["--int8shiftAlphaAll"]
-    elif args.model_variant == "gpu":
-        if not args.workspace:
-            raise Exception("The workspace size was not provided")
-        marian_extra_args = [
-            '--workspace', args.workspace,
-            '--devices', args.gpus,
-        ]  # fmt: skip
-    elif not args.model_variant == "cpu":
-        raise Exception(f"Unsupported model variant {args.model_variant}")
+    ## Configure Marian for the different model variants.
+    # marian_extra_args = []
+    # if args.model_variant == "quantized":
+    #    marian_extra_args = ["--int8shiftAlphaAll"]
+    # elif args.model_variant == "gpu":
+    #    if not args.workspace:
+    #        raise Exception("The workspace size was not provided")
+    #    marian_extra_args = [
+    #        '--workspace', args.workspace,
+    #        '--devices', args.gpus,
+    #    ]  # fmt: skip
+    # elif not args.model_variant == "cpu":
+    #    raise Exception(f"Unsupported model variant {args.model_variant}")
 
-    if args.vocab:
-        # Pass in the vocab twice as it's shared between the source and the target.
-        marian_extra_args = [*marian_extra_args, "--vocabs", args.vocab, args.vocab]
+    # if args.vocab:
+    #    # Pass in the vocab twice as it's shared between the source and the target.
+    #    marian_extra_args = [*marian_extra_args, "--vocabs", args.vocab, args.vocab]
 
-    if args.shortlist:
-        # The final "false" argument tells Marian not to verify the correctness of the shortlist.
-        marian_extra_args = marian_extra_args + ["--shortlist", args.shortlist, "false"]
+    # if args.shortlist:
+    #    # The final "false" argument tells Marian not to verify the correctness of the shortlist.
+    #    marian_extra_args = marian_extra_args + ["--shortlist", args.shortlist, "false"]
 
-    logger.info("The eval script is configured with the following:")
-    logger.info(f" >          artifacts_dir: {artifacts_dir}")
-    logger.info(f" > source_file_compressed: {source_file_compressed}")
-    logger.info(f" >            source_file: {source_file}")
-    logger.info(f" >            target_file: {target_file}")
-    logger.info(f" >        target_ref_file: {target_ref_file}")
-    logger.info(f" >         marian_decoder: {marian_decoder}")
-    logger.info(f" >        marian_log_file: {marian_log_file}")
-    logger.info(f" >          language_pair: {language_pair}")
-    logger.info(f" >           metrics_file: {metrics_file}")
-    logger.info(f" >           metrics_json: {metrics_json}")
-    logger.info(f" >      marian_extra_args: {marian_extra_args}")
-    logger.info(f" >                   gpus: {args.gpus}")
+    # logger.info("The eval script is configured with the following:")
+    # logger.info(f" >          artifacts_dir: {artifacts_dir}")
+    # logger.info(f" > source_file_compressed: {source_file_compressed}")
+    # logger.info(f" >            source_file: {source_file}")
+    # logger.info(f" >            target_file: {target_file}")
+    # logger.info(f" >        target_ref_file: {target_ref_file}")
+    # logger.info(f" >         marian_decoder: {marian_decoder}")
+    # logger.info(f" >        marian_log_file: {marian_log_file}")
+    # logger.info(f" >          language_pair: {language_pair}")
+    # logger.info(f" >           metrics_file: {metrics_file}")
+    # logger.info(f" >           metrics_json: {metrics_json}")
+    # logger.info(f" >      marian_extra_args: {marian_extra_args}")
+    # logger.info(f" >                   gpus: {args.gpus}")
 
-    logger.info("Ensure that the artifacts directory exists.")
-    os.makedirs(artifacts_dir, exist_ok=True)
+    # logger.info("Ensure that the artifacts directory exists.")
+    # os.makedirs(artifacts_dir, exist_ok=True)
 
-    logger.info("Save the original target sentences to the artifacts")
+    # logger.info("Save the original target sentences to the artifacts")
 
-    run_bash_oneliner(
-        f"""
-        {args.compression_cmd} -dc "{target_file_compressed}" > "{target_ref_file}"
-        """
-    )
+    # run_bash_oneliner(
+    #    f"""
+    #    {args.compression_cmd} -dc "{target_file_compressed}" > "{target_ref_file}"
+    #    """
+    # )
 
-    run_bash_oneliner(
-        f"""
-        # Decompress the source file, e.g. $fetches/wmt09.en.gz
-        {args.compression_cmd} -dc "{source_file_compressed}"
+    # run_bash_oneliner(
+    #    f"""
+    #    # Decompress the source file, e.g. $fetches/wmt09.en.gz
+    #    {args.compression_cmd} -dc "{source_file_compressed}"
 
-        # Tee the source file into the artifacts directory, e.g. $artifacts/wmt09.en
-        | tee "{source_file}"
+    #    # Tee the source file into the artifacts directory, e.g. $artifacts/wmt09.en
+    #    | tee "{source_file}"
 
-        # Take the source and pipe it in to be decoded (translated) by Marian.
-        | {marian_decoder}
-            --models {args.models}
-            --config {args.marian_config}
-            --quiet
-            --quiet-translation
-            --log {marian_log_file}
-            {" ".join(marian_extra_args)}
+    #    # Take the source and pipe it in to be decoded (translated) by Marian.
+    #    | {marian_decoder}
+    #        --models {args.models}
+    #        --config {args.marian_config}
+    #        --quiet
+    #        --quiet-translation
+    #        --log {marian_log_file}
+    #        {" ".join(marian_extra_args)}
 
-        # The translations be "tee"ed out to the artifacts, e.g. $artifacts/wmt09.ca
-        | tee "{target_file}"
-        """
-    )
+    #    # The translations be "tee"ed out to the artifacts, e.g. $artifacts/wmt09.ca
+    #    | tee "{target_file}"
+    #    """
+    # )
 
-    with open(target_ref_file, "r") as file:
-        target_ref_lines = file.readlines()
-    with open(target_file, "r") as file:
-        target_lines = file.readlines()
-    with open(source_file, "r") as file:
-        source_lines = file.readlines()
+    # with open(target_ref_file, "r") as file:
+    #    target_ref_lines = file.readlines()
+    # with open(target_file, "r") as file:
+    #    target_lines = file.readlines()
+    # with open(source_file, "r") as file:
+    #    source_lines = file.readlines()
 
-    compute_bleu = BLEU(trg_lang=trg)
-    compute_chrf = CHRF()
+    # compute_bleu = BLEU(trg_lang=trg)
+    # compute_chrf = CHRF()
 
-    logger.info("Computing the BLEU score.")
-    bleu_score: BLEUScore = compute_bleu.corpus_score(target_lines, [target_ref_lines])
-    bleu_details = json.loads(
-        bleu_score.format(signature=compute_bleu.get_signature().format(), is_json=True)
-    )
+    # logger.info("Computing the BLEU score.")
+    # bleu_score: BLEUScore = compute_bleu.corpus_score(target_lines, [target_ref_lines])
+    # bleu_details = json.loads(
+    #    bleu_score.format(signature=compute_bleu.get_signature().format(), is_json=True)
+    # )
 
-    logger.info("Computing the chrF score.")
-    chrf_score: CHRFScore = compute_chrf.corpus_score(target_lines, [target_ref_lines])
-    chrf_details = json.loads(
-        chrf_score.format(signature=compute_chrf.get_signature().format(), is_json=True)
-    )
+    # logger.info("Computing the chrF score.")
+    # chrf_score: CHRFScore = compute_chrf.corpus_score(target_lines, [target_ref_lines])
+    # chrf_details = json.loads(
+    #    chrf_score.format(signature=compute_chrf.get_signature().format(), is_json=True)
+    # )
 
-    # The default comet model.
-    # It should match the model used in https://github.com/mozilla/firefox-translations-models/
-    comet_model_name = "Unbabel/wmt22-comet-da"
+    ## The default comet model.
+    ## It should match the model used in https://github.com/mozilla/firefox-translations-models/
+    # comet_model_name = "Unbabel/wmt22-comet-da"
 
-    if os.environ.get("COMET_SKIP"):
-        comet_score = "skipped"
-        print("COMET_SKIP was set, so the COMET score will not be computed.")
-    else:
-        logger.info("Loading COMET")
-        import comet
+    # if os.environ.get("COMET_SKIP"):
+    #    comet_score = "skipped"
+    #    print("COMET_SKIP was set, so the COMET score will not be computed.")
+    # else:
+    #    logger.info("Loading COMET")
+    #    import comet
 
-        # COMET_MODEL_DIR allows tests to place the model in a data directory
-        comet_checkpoint = comet.download_model(
-            comet_model_name, saving_directory=os.environ.get("COMET_MODEL_DIR")
-        )
-        comet_model = comet.load_from_checkpoint(comet_checkpoint)
-        comet_data = []
-        for source, target, target_ref in zip(source_lines, target_lines, target_ref_lines):
-            comet_data.append({"src": source, "mt": target, "ref": target_ref})
-        # GPU information comes in the form of a list of numbers, e.g. "0 1 2 3". Split these to
-        # get the GPU count.
-        gpu_count = len(args.gpus.split(" "))
-        if os.environ.get("COMET_CPU"):
-            gpu_count = 0  # Let tests override the CPU count.
-        comet_mode = "cpu" if gpu_count == 0 else "gpu"
-        logger.info(f'Computing the COMET score with "{comet_model_name}" using the {comet_mode}')
+    #    # COMET_MODEL_DIR allows tests to place the model in a data directory
+    #    comet_checkpoint = comet.download_model(
+    #        comet_model_name, saving_directory=os.environ.get("COMET_MODEL_DIR")
+    #    )
+    #    comet_model = comet.load_from_checkpoint(comet_checkpoint)
+    #    comet_data = []
+    #    for source, target, target_ref in zip(source_lines, target_lines, target_ref_lines):
+    #        comet_data.append({"src": source, "mt": target, "ref": target_ref})
+    #    # GPU information comes in the form of a list of numbers, e.g. "0 1 2 3". Split these to
+    #    # get the GPU count.
+    #    gpu_count = len(args.gpus.split(" "))
+    #    if os.environ.get("COMET_CPU"):
+    #        gpu_count = 0  # Let tests override the CPU count.
+    #    comet_mode = "cpu" if gpu_count == 0 else "gpu"
+    #    logger.info(f'Computing the COMET score with "{comet_model_name}" using the {comet_mode}')
 
-        comet_results = comet_model.predict(comet_data, gpus=gpu_count)
-        # Reduce the precision.
-        comet_score = round(comet_results.system_score, 4)
+    #    comet_results = comet_model.predict(comet_data, gpus=gpu_count)
+    #    # Reduce the precision.
+    #    comet_score = round(comet_results.system_score, 4)
+
+    bleu_details = {"score": 0.42}
+    chrf_details = {"score": 0.13}
+    comet_score = 0.37
+    comet_model_name = "test"
 
     metrics = {
         "bleu": {
@@ -334,13 +338,13 @@ def main(args_list: Optional[list[str]] = None) -> None:
         },
     }
 
-    logger.info(f"Writing {metrics_json}")
-    with open(metrics_json, "w") as file:
-        file.write(json.dumps(metrics, indent=2))
+    # logger.info(f"Writing {metrics_json}")
+    # with open(metrics_json, "w") as file:
+    #    file.write(json.dumps(metrics, indent=2))
 
-    logger.info(f'Writing the metrics in the older "text" format: {metrics_file}')
-    with open(metrics_file, "w") as file:
-        file.write(f"{bleu_details['score']}\n" f"{chrf_details['score']}\n" f"{comet_score}\n")
+    ##logger.info(f'Writing the metrics in the older "text" format: {metrics_file}')
+    # with open(metrics_file, "w") as file:
+    #    file.write(f"{bleu_details['score']}\n" f"{chrf_details['score']}\n" f"{comet_score}\n")
 
     if WANDB_AVAILABLE:
         wandb = get_wandb_publisher(  # noqa
@@ -351,16 +355,48 @@ def main(args_list: Optional[list[str]] = None) -> None:
             artifacts=args.wandb_artifacts,
             publication=args.wandb_publication,
         )
-        if wandb:
-            logger.info("Initializing Weight & Biases client")
-            # Allow publishing metrics as a table on existing runs (i.e. previous trainings)
-            wandb.open(resume=True)
-            logger.info(f"Publishing metrics to Weight & Biases ({wandb.extra_kwargs})")
-            metric = metric_from_tc_context(
-                chrf=chrf_details["score"], bleu=bleu_details["score"], comet=comet_score
-            )
-            wandb.handle_metrics(metrics=[metric])
-            wandb.close()
+        # logger.info(f"Publishing metrics to Weight & Biases ({wandb.extra_kwargs})")
+        run_client.open(resume=True)
+        run_client.handle_metrics(metrics=[metric])
+        run_client.close()
+
+        # Publish an extra row on the group_logs summary run
+        group_logs_client = WandB(  # noqa
+            project=run_client.wandb.project,
+            group=run_client.wandb.group,
+            name="group_logs",
+        )
+        # logger.info("Adding metric row to the 'group_logs' run")
+        group_logs_client.open(resume=True)
+
+        # Restore existing metrics data
+        data = list_existing_group_logs_metrics(group_logs_client.wandb)
+        data.append(
+            [
+                run_client.wandb.group,
+                run_client.wandb.name,
+                metric.importer,
+                metric.dataset,
+                metric.augmentation,
+            ]
+            + [getattr(metric, attr) for attr in METRIC_KEYS]
+        )
+        group_logs_client.wandb.log(
+            {
+                "metrics": wandb.Table(
+                    columns=[
+                        "Group",
+                        "Model",
+                        "Importer",
+                        "Dataset",
+                        "Augmenation",
+                        *METRIC_KEYS,
+                    ],
+                    data=data,
+                )
+            }
+        )
+        group_logs_client.close()
 
 
 if __name__ == "__main__":
