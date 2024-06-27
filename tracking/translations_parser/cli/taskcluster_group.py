@@ -12,9 +12,8 @@ import tempfile
 from collections import defaultdict
 from pathlib import Path
 
-import wandb
-
 import taskcluster
+import wandb
 from taskcluster.download import downloadArtifactToBuf
 from translations_parser.data import Metric
 from translations_parser.parser import TrainingParser, logger

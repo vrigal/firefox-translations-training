@@ -74,8 +74,8 @@ def get_wandb_names():
     the taskcluster task & group payloads
     """
     task_id = os.environ.get("TASK_ID")
-    if not task_id:
-        raise Exception("Weight & Biases name detection can only run in taskcluster")
+    # if not task_id:
+    #    raise Exception("Weight & Biases name detection can only run in taskcluster")
 
     # Load task & group definition
     # CI task groups do not expose any configuration, so we must use default values
@@ -128,7 +128,7 @@ def get_wandb_publisher(
         ), "When using `--taskcluster-secret`, `TASKCLUSTER_PROXY_URL` environment variable must be set too."
 
         # Weight and Biases client use environment variable to read the token
-        os.environ.setdefault("WANDB_API_KEY", get_wandb_token(taskcluster_secret))
+        # os.environ.setdefault("WANDB_API_KEY", get_wandb_token(taskcluster_secret))
 
         project_name, group_name, run_name = get_wandb_names()
 
