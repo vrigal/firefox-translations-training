@@ -1,0 +1,4 @@
+datasets:
+  original: /home/valentin/dev/firefox-translations-training/original-dataset.tsv
+  backtranslated: /home/valentin/dev/firefox-translations-training/back-dataset.tsv
+

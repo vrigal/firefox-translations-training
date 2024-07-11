@@ -1,0 +1,6 @@
+a: 42
+b:
+  - a
+  - list
+  - of
+  - {4: elements}
